@@ -1,0 +1,122 @@
+FROM dustynv/ros:noetic-desktop-l4t-r35.4.1
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Etc/UTC \
+    CATKIN_WS=/opt/catkin_ws
+
+# Refresh ROS GPG key BEFORE update
+RUN apt-get install -y --no-install-recommends curl gnupg2 lsb-release \
+ && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt-key add - \
+ && rm -rf /var/lib/apt/lists/*
+
+# Install dependencies
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    git \
+    build-essential \
+    libjsoncpp-dev \
+    libeigen3-dev \
+    libspdlog-dev \
+    libcurl4-openssl-dev \ 
+    libpcl-dev \
+    libturbojpeg0-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libtiff-dev \
+    libtheora-dev \
+    zlib1g-dev \
+    pkg-config \
+    nano wget cmake \
+    ros-noetic-rviz \
+    ros-noetic-foxglove-bridge \
+    ros-noetic-visualization-msgs \
+    ros-noetic-geometry-msgs \
+    ros-noetic-nav-msgs \
+    ros-noetic-std-msgs \
+    ros-noetic-stereo-msgs \
+    ros-noetic-tf \
+    ros-noetic-tf-conversions \
+    ros-noetic-pcl-ros \
+    ros-noetic-pcl-conversions \
+    ros-noetic-eigen-conversions \
+    ros-noetic-camera-info-manager \ 
+    v4l-utils \
+    iputils-ping \
+    net-tools \
+    usbutils 
+    #ros-noetic-image-transport
+    #ros-noetic-image-geometry
+    #os-noetic-compressed-image-transport 
+
+# Clone and build Sophus
+WORKDIR /tmp
+RUN git clone https://github.com/strasdat/Sophus.git && cd Sophus && git checkout a621ff2e
+
+# patch + build (run CMake in the Sophus folder)
+WORKDIR /tmp/Sophus
+RUN sed -i -E \
+    -e 's/unit_complex_\.real\(\)\s*=\s*([0-9eE+\.-]+);/unit_complex_.real(\1);/' \
+    -e 's/unit_complex_\.imag\(\)\s*=\s*([0-9eE+\.-]+);/unit_complex_.imag(\1);/' \
+    sophus/so2.cpp \
+ && cmake -S . -B build \
+ && cmake --build build -j"$(nproc)" \
+ && cmake --install build
+
+# ---------- Create catkin workspace ----------
+RUN mkdir -p ${CATKIN_WS}/src
+WORKDIR ${CATKIN_WS}
+
+# ---------- Clone Vikit (required fork) ----------
+WORKDIR ${CATKIN_WS}/src
+RUN git clone https://github.com/xuankuzcr/rpg_vikit.git
+
+# ---------- Clone vision_opencv ----------
+RUN git clone -b noetic https://github.com/ros-perception/vision_opencv.git
+
+# ---------- Clone image_transport_plugins ----------
+RUN git clone -b noetic-devel https://github.com/ros-perception/image_transport_plugins.git
+
+# ---------- Clone FAST-LIVO2 ----------
+RUN git clone https://github.com/hku-mars/FAST-LIVO2.git
+
+# ---------- Clone ouster-ros ----------
+RUN git clone --recurse-submodules https://github.com/ouster-lidar/ouster-ros.git
+
+# ---------- Clone usb_cam ----------
+RUN git clone --branch 0.3.7 https://github.com/ros-drivers/usb_cam.git
+
+# ---------- Clone image_pipeline for camera calibration ----------
+RUN git clone -b noetic https://github.com/ros-perception/image_pipeline.git
+
+# ---------- Clone FAST-Calib ----------
+RUN git clone https://github.com/hku-mars/FAST-Calib.git
+
+# ---------- Patch FAST-Calib package.xml (add <build_depend>image_geometry<\/build_depend> and <run_depend>image_geometry<\/run_depend>) ----------
+RUN sed -i -E \
+    -e '/<build_depend>image_geometry<\/build_depend>/! s|(  <build_depend>cv_bridge</build_depend>)|\1\n  <build_depend>image_geometry</build_depend>|' \
+    -e '/<run_depend>image_geometry<\/run_depend>/! s|(  <run_depend>cv_bridge</run_depend>)|\1\n  <run_depend>image_geometry</run_depend>|' \
+    FAST-Calib/package.xml
+
+# ---------- Patch FAST-Calib CMakeLists.txt (add cv_bridge, image_transport, image_geometry to find_package(catkin REQUIRED COMPONENTS …) ----------
+# ---------- Patch FAST-Calib CMakeLists.txt (add geometry_msgs cv_bridge image_transport image_geometry to catkin_package(CATKIN_DEPENDS …) ----------
+RUN set -e; \
+    # Add to find_package(catkin REQUIRED COMPONENTS ...)
+    if ! grep -qE 'find_package\(catkin REQUIRED COMPONENTS([^\)]*)\bcv_bridge\b' FAST-Calib/CMakeLists.txt; then \
+      sed -i -E '/^find_package\(catkin REQUIRED COMPONENTS/,/^\)/ s/^\)/  cv_bridge\n  image_transport\n  image_geometry\n)/' FAST-Calib/CMakeLists.txt; \   
+    fi; \ 
+    # Add  to catkin_package(CATKIN_DEPENDS …) 
+    if ! grep -qE 'catkin_package\([^)]*CATKIN_DEPENDS[^)]*\bgeometry_msgs\b' FAST-Calib/CMakeLists.txt; then \   
+      sed -i -E '/^catkin_package\(/,/^\)/ s/^\)/  geometry_msgs\n  cv_bridge\n  image_transport\n  image_geometry\n)/' FAST-Calib/CMakeLists.txt; \
+    fi
+
+# ---------- Build (catkin_make) ----------
+WORKDIR ${CATKIN_WS}
+RUN /bin/bash -lc "source /opt/ros/noetic/setup.bash && \
+    catkin_make -DCMAKE_BUILD_TYPE=Release VERBOSE=1 && \
+    echo 'source ${CATKIN_WS}/devel/setup.bash' >> /etc/bash.bashrc"
+
+#WORKDIR /root
+#RUN wget http://192.168.1.135:8000/CBD_Building_01.bag
+
+# ---------- Default shell ----------
+CMD ["/bin/bash"]
