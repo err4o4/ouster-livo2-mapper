@@ -61,10 +61,9 @@ RUN sed -i -E \
 
 # ---------- Create catkin workspace ----------
 RUN mkdir -p ${CATKIN_WS}/src
-WORKDIR ${CATKIN_WS}
+WORKDIR ${CATKIN_WS}/src
 
 # ---------- Clone repos ----------
-WORKDIR ${CATKIN_WS}/src
 RUN git clone https://github.com/xuankuzcr/rpg_vikit.git
 RUN git clone -b noetic https://github.com/ros-perception/vision_opencv.git
 RUN git clone -b noetic-devel https://github.com/ros-perception/image_transport_plugins.git

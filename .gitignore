@@ -1,2 +1,8 @@
+ros_overlay/FAST-Calib/calib_data/*
+!ros_overlay/FAST-Calib/calib_data/.gitkeep
+
+ros_overlay/FAST-Calib/output/*
+!ros_overlay/FAST-Calib/output/.gitkeep
+
 .DS_Store
 Thumbs.db
