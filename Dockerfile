@@ -97,7 +97,7 @@ RUN ls ./build
 RUN rm ./src/LiDAR_IMU_Init/CATKIN_IGNORE
 RUN rm ./src/FAST_LIO/CATKIN_IGNORE
 RUN /bin/bash -lc "source /opt/ros/noetic/setup.bash && \
-    catkin_make -DCMAKE_BUILD_TYPE=Release --pkg LiDAR_IMU_Init FAST_LIO && \
+    catkin_make -DCMAKE_BUILD_TYPE=Release --pkg lidar_imu_init fast_lio && \
     echo 'source ${CATKIN_WS}/devel/setup.bash' >> /etc/bash.bashrc"
 
 # ---------- Default shell ----------
