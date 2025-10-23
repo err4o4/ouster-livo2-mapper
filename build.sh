@@ -27,8 +27,17 @@ esac
 
 set -x
 
-docker buildx build \
+if [[ "$PLATFORM_RAW" == "amd64" ]]; then
+  docker buildx build \
+    --platform "${DOCKER_PLATFORM}" \
     --network=host \
     --build-arg BASE_IMAGE="${BASE_IMAGE}" \
     -t "hku_mars_${PLATFORM_RAW}" \
     .
+
+elif [[ "$PLATFORM_RAW" == "arm64" ]]; then
+  docker build \
+    --build-arg BASE_IMAGE="${BASE_IMAGE}" \
+    -t "hku_mars_${PLATFORM_RAW}" \
+    .
+fi
