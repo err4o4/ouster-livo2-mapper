@@ -1,0 +1,5 @@
+{"imu_to_sensor_transform": [1, 0, 0, -2.441, 0, 1, 0, -9.725, 0, 0, 1, 7.533, 0, 0, 0, 1]}
+{"lidar_to_sensor_transform": [-1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1, 38.195, 0, 0, 0, 1]}
+
+#extrinsic_R represents the rotation matrix of LiDAR frame w.r.t. IMU frame.
+#extrinsic_T represents the translation of LiDAR frame w.r.t. IMU frame.

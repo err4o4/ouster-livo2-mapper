@@ -17,14 +17,14 @@
   circle_radius: 0.12 # Radius of the circle 
 
 # Distance filter 22 bag
-  #x_min: 0.8 # avia and mid360: 2.0 ouster: 1.5
-  #x_max: 1.2
-  #y_min: -0.5 # right side
-  #y_max: 0.7 # left side
-  #z_min: -0.5 # avia and mid360: -0.5 ouster: -0.8
-  #z_max: 0.4
-  #bag_path: "$(find fast_calib)/calib_data/22.bag"
-  #image_path: "$(find fast_calib)/calib_data/22.png"
+  x_min: 0.8 # avia and mid360: 2.0 ouster: 1.5
+  x_max: 1.2
+  y_min: -0.5 # right side
+  y_max: 0.7 # left side
+  z_min: -0.5 # avia and mid360: -0.5 ouster: -0.8
+  z_max: 0.4
+  bag_path: "$(find fast_calib)/calib_data/22.bag"
+  image_path: "$(find fast_calib)/calib_data/22.png"
 
 # Distance filter 33 bag
   #x_min: 0.8 # avia and mid360: 2.0 ouster: 1.5
@@ -37,14 +37,14 @@
   #image_path: "$(find fast_calib)/calib_data/33.png"
 
 # Distance filter 44 bag
-  x_min: 1.0 # avia and mid360: 2.0 ouster: 1.5
-  x_max: 1.8
-  y_min: -0.65 # right side
-  y_max: 0.45 # left side
-  z_min: -0.4 # avia and mid360: -0.5 ouster: -0.8
-  z_max: 0.35
-  bag_path: "$(find fast_calib)/calib_data/44.bag"
-  image_path: "$(find fast_calib)/calib_data/44.png"
+  #x_min: 1.0 # avia and mid360: 2.0 ouster: 1.5
+  #x_max: 1.8
+  #y_min: -0.65 # right side
+  #y_max: 0.45 # left side
+  #z_min: -0.4 # avia and mid360: -0.5 ouster: -0.8
+  #z_max: 0.35
+  #bag_path: "$(find fast_calib)/calib_data/44.bag"
+  #image_path: "$(find fast_calib)/calib_data/44.png"
 
 # Input
   lidar_topic: "/ouster/points" # /ouster/points /livox/lidar

@@ -9,6 +9,9 @@ RUN apt-get install -y --no-install-recommends curl gnupg2 lsb-release \
  && curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key | apt-key add - \
  && rm -rf /var/lib/apt/lists/*
 
+# Install pyusb to toggle camera to trigger mode
+RUN pip3 install pyusb
+
 # Install dependencies
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
@@ -28,6 +31,7 @@ RUN apt-get update \
     pkg-config \
     nano wget cmake \
     ros-noetic-rviz \
+    ros-noetic-rqt-bag \
     ros-noetic-foxglove-bridge \
     ros-noetic-visualization-msgs \
     ros-noetic-geometry-msgs \
@@ -73,7 +77,7 @@ RUN git clone -b noetic https://github.com/ros-perception/image_pipeline.git
 RUN git clone https://github.com/err4o4/ros-econ-trigger-camera.git
 
 # ---------- Clone FAST-Calib ----------
-RUN git clone https://github.com/hku-mars/FAST-LIVO2.git
+RUN git clone https://github.com/err4o4/FAST-LIVO2.git
 RUN git clone https://github.com/err4o4/FAST-Calib.git
 
 # ---------- Build (catkin_make) ----------

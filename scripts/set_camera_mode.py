@@ -1,41 +1,94 @@
+#!/usr/bin/env python3
+import argparse
+import sys
+import subprocess
 import usb.core
 import usb.util
-import sys
 
-dev=usb.core.find(idVendor=0x2560, idProduct=0xc128) #lsusb to list attached devices in case your id's are different.
-#print(dev) #uncomment to see the configuration tree.
-#Follow the tree: dev[0] = configuration 1.
-#interfaces()[2] = HID interface
-#0x06 = Interrupt OUT. (Endpoint)
+# python3 set_camera_mode.py --trigger 1 --device /dev/video0 --wb 4500 --exposure 2000
 
-if dev is None:
-    raise ValueError('Device not found')
-cfg=-1
+def run(cmd):
+    # Safer than shell=True; raises on failure
+    subprocess.run(cmd, check=True)
 
-i = dev[0].interfaces()[2].bInterfaceNumber
+def set_v4l2_for_trigger(device: str, trigger: int, wb_temp: int, exposure: int):
+    if trigger == 1:
+        # External trigger → lock exposure & WB
+        run(["v4l2-ctl", "-d", device, "--set-ctrl=exposure_auto=1"])
+        run(["v4l2-ctl", "-d", device, "--set-ctrl=white_balance_temperature_auto=0"])
+        run(["v4l2-ctl", "-d", device, f"--set-ctrl=white_balance_temperature={wb_temp}"])
+        run(["v4l2-ctl", "-d", device, f"--set-ctrl=exposure_absolute={exposure}"])
+    else:
+        # Master mode → revert to auto
+        run(["v4l2-ctl", "-d", device, "--set-ctrl=exposure_auto=0"])
+        run(["v4l2-ctl", "-d", device, "--set-ctrl=white_balance_temperature_auto=1"])
 
-cfg = dev.get_active_configuration()
-intf = cfg[(2,0)]
-
-if dev.is_kernel_driver_active(i):
+def show_current(device: str):
     try:
-        reattach = True
-        dev.detach_kernel_driver(i)
-        #print("eh") #debug making sure it got in here.
+        out = subprocess.check_output(
+            ["v4l2-ctl", "-d", device, "--get-ctrl=exposure_auto,exposure_absolute,white_balance_temperature_auto,white_balance_temperature"],
+            text=True
+        )
+        print("Current controls:")
+        print(out)
+    except Exception as e:
+        print(f"(warn) Could not read current controls: {e}")
+
+def main():
+    p = argparse.ArgumentParser(description="Set trigger mode and camera controls.")
+    p.add_argument("--trigger", "-t", type=int, choices=(0, 1), required=True,
+                   help="0 = master (auto), 1 = external (manual)")
+    p.add_argument("--device", "-d", default="/dev/video0",
+                   help="V4L2 device path (default: /dev/video0)")
+    p.add_argument("--wb", type=int, default=4500,
+                   help="White balance temperature when manual (default: 4500)")
+    p.add_argument("--exposure", type=int, default=300,
+                   help="Exposure absolute when manual (default: 300)")
+    p.add_argument("--vendor", type=lambda x: int(x, 0), default=0x2560,
+                   help="USB vendor id (hex or int). Default: 0x2560")
+    p.add_argument("--product", type=lambda x: int(x, 0), default=0xc128,
+                   help="USB product id (hex or int). Default: 0xc128")
+    args = p.parse_args()
+
+    # --- Find and prep USB device ---
+    dev = usb.core.find(idVendor=args.vendor, idProduct=args.product)
+    if dev is None:
+        sys.exit("Device not found")
+
+    try:
+        i = dev[0].interfaces()[2].bInterfaceNumber
+        cfg = dev.get_active_configuration()
+        _ = cfg[(2, 0)]
+    except Exception as e:
+        sys.exit(f"USB interface error: {e}")
+
+    if dev.is_kernel_driver_active(i):
+        try:
+            dev.detach_kernel_driver(i)
+        except usb.core.USBError as e:
+            sys.exit(f"Could not detach kernel driver from interface({i}): {e}")
+
+    # --- Send trigger mode control message ---
+    msg = [0] * 64
+    msg[0] = 0xA8
+    msg[1] = 0x1C
+    msg[2] = 1 if args.trigger == 1 else 0  # 1=ext trigger, 0=master
+    msg[3] = 0x00
+
+    try:
+        dev.write(0x06, msg, 1000)
+        print(f"Trigger mode set to: {'External (manual)' if args.trigger == 1 else 'Master (auto)'}")
     except usb.core.USBError as e:
-        sys.exit("Could not detach kernel driver from interface({0}): {1}".format(i, str(e)))
+        sys.exit(f"USB write failed: {e}")
 
+    # --- Apply v4l2 controls based on trigger mode ---
+    try:
+        set_v4l2_for_trigger(args.device, args.trigger, args.wb, args.exposure)
+    except subprocess.CalledProcessError as e:
+        sys.exit(f"v4l2-ctl failed: {e}")
 
-print(dev) #not needed, just helpful for debug
-msg = [0] * 64
-#msg = [0xA0, 0xc1, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00] #gotta send a 64 byte message.
-msg[0] = 0xA8 #these command sets are in the qtcam source code.
-msg[1] = 0x1c
-msg[2] = 0x01 # 01= ext trigger. 00 = Master mode.
-msg[3] = 0x00
+    show_current(args.device)
+    print("Done.")
 
-
-dev.write(0x6,msg,1000) 
-#wham bam, thank you ma'am. Just write msg to the 0x06 endpoint. 
-#The 1000 is a timeout in ms. That should go back down, but it's an artifact of debugging. 
-#Also, for debugging, I recommend using wireshark set to capture usb packets while you're sending them from qtcam.
+if __name__ == "__main__":
+    main()

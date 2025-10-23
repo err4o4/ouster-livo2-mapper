@@ -1,39 +1,16 @@
-
-docker exec -it a44d61838f13 /bin/bash
-
-
-
-
-source
-
-
-roslaunch foxglove_bridge foxglove_bridge.launch
-roslaunch usb_cam usb_cam-test.launch
-roslaunch ouster_ros driver.launch sensor_hostname:=<sensor host name> metadata:=<json file name>
-roslaunch ouster_ros driver.launch sensor_hostname:=os-122317001053.local
-
-
 kill all ros processes 
 pkill -f ros
 
 
+Set lidar address
+```
+https://github.com/KumarRobotics/kr_autonomous_flight/wiki/New-Robot:-Ouster-OS-1---Setup---PTP#set-up-static-ip
+```
 
-MAC OS
-
-mkdir sources
-cd sources
-
-./fast-calib.sh
-
-docker run -it --rm \
-  -p 8765:8765 \
-  -v ./FAST-Calib:/opt/catkin_ws/src/FAST-Calib \
-  fast-livo2:noetic-r35.4.1
-
-
-Jetson
-
-
+Set PTP Sync 
+```
+sudo ptp4l -i eth0 -m -4
+```
 
 Build container
 ```
@@ -49,11 +26,14 @@ docker run -it --rm \
   -v ./ros_overlay/FAST-Calib/config:/opt/catkin_ws/src/FAST-Calib/config \
   -v ./ros_overlay/FAST-Calib/calib_data:/opt/catkin_ws/src/FAST-Calib/calib_data \
   -v ./ros_overlay/FAST-Calib/output:/opt/catkin_ws/src/FAST-Calib/output \
+  -v ./ros_overlay/FAST-LIVO2/config:/opt/catkin_ws/src/FAST-LIVO2/config \
+  -v ./scripts:/opt/scripts \
   --name fast-livo2 \
   fast-livo2:noetic-r35.4.1
 
 
 // Jetson
+export DISPLAY=:1
 xhost +local:root  
 docker run -it --rm \
   --runtime nvidia \
@@ -69,6 +49,8 @@ docker run -it --rm \
   -v ./ros_overlay/FAST-Calib/config:/opt/catkin_ws/src/FAST-Calib/config \
   -v ./ros_overlay/FAST-Calib/calib_data:/opt/catkin_ws/src/FAST-Calib/calib_data \
   -v ./ros_overlay/FAST-Calib/output:/opt/catkin_ws/src/FAST-Calib/output \
+  -v ./ros_overlay/FAST-LIVO2/config:/opt/catkin_ws/src/FAST-LIVO2/config \
+  -v ./scripts:/opt/scripts \
   --name fast-livo2 \
   fast-livo2:noetic-r35.4.1
 ```
@@ -90,10 +72,12 @@ nano /opt/catkin_ws/src/usb_cam/launch/usb_cam-test.launch
 roslaunch usb_cam usb_cam-test.launch
 
 // start camera with trigger mode
+python3 set_camera_mode.py --trigger 1 --device /dev/video0 --wb 4500 --exposure 2000
 roslaunch trigger_cam trigger_cam.launch
 
 // start lidar
 roslaunch ouster_ros driver.launch sensor_hostname:=169.254.33.38
+roslaunch ouster_ros driver.launch sensor_hostname:=192.168.100.2
 
 // start calib 
 // edit config/qr_params.yaml first
