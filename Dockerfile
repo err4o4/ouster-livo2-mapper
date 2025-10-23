@@ -1,4 +1,5 @@
-FROM dustynv/ros:noetic-desktop-l4t-r35.4.1
+#FROM dustynv/ros:noetic-desktop-l4t-r35.4.1
+FROM osrf/ros:noetic-desktop-full
 
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Etc/UTC \
@@ -15,39 +16,19 @@ RUN pip3 install pyusb
 # Install dependencies
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
-    git \
-    build-essential \
-    libjsoncpp-dev \
-    libeigen3-dev \
-    libspdlog-dev \
-    libcurl4-openssl-dev \ 
-    libpcl-dev \
-    libturbojpeg0-dev \
-    libjpeg-dev \
-    libpng-dev \
-    libtiff-dev \
-    libtheora-dev \
-    zlib1g-dev \
-    pkg-config \
+    git build-essential pkg-config \
+    v4l-utils iputils-ping net-tools usbutils \
     nano wget cmake \
-    ros-noetic-rviz \
-    ros-noetic-rqt-bag \
-    ros-noetic-foxglove-bridge \
-    ros-noetic-visualization-msgs \
-    ros-noetic-geometry-msgs \
-    ros-noetic-nav-msgs \
-    ros-noetic-std-msgs \
-    ros-noetic-stereo-msgs \
-    ros-noetic-tf \
-    ros-noetic-tf-conversions \
-    ros-noetic-pcl-ros \
-    ros-noetic-pcl-conversions \
-    ros-noetic-eigen-conversions \
-    ros-noetic-camera-info-manager \ 
-    v4l-utils \
-    iputils-ping \
-    net-tools \
-    usbutils 
+    libjsoncpp-dev libeigen3-dev libspdlog-dev libcurl4-openssl-dev \ 
+    libpcl-dev libturbojpeg0-dev libjpeg-dev libpng-dev libtiff-dev \
+    libtheora-dev zlib1g-dev \
+    ros-noetic-rviz ros-noetic-rqt-bag \
+    ros-noetic-foxglove-bridge ros-noetic-visualization-msgs \
+    ros-noetic-geometry-msgs ros-noetic-nav-msgs \
+    ros-noetic-std-msgs ros-noetic-stereo-msgs \
+    ros-noetic-tf ros-noetic-tf-conversions \
+    ros-noetic-pcl-ros ros-noetic-pcl-conversions \
+    ros-noetic-eigen-conversions ros-noetic-camera-info-manager 
 
 # Clone and build Sophus
 WORKDIR /tmp
