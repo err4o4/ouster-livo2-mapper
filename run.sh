@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+set -x
 
 if [[ $# -lt 1 ]]; then
   echo "Usage: $0 <platform>"
-  echo "  platform: amd64 | jeston | mac_os"
+  echo "  platform: amd64 | jetson | mac_os"
   exit 1
 fi
 
@@ -26,12 +27,11 @@ COMMON_VOLUMES=(
 
   -v ./ros_overlay/FAST-LIVO2/config:/opt/catkin_ws/src/FAST-LIVO2/config
   -v ./ros_overlay/FAST-LIVO2/launch:/opt/catkin_ws/src/FAST-LIVO2/launch
-  
+
   -v ./scripts:/opt/scripts
 )
 
 NAME="hku_mars_${PLATFORM_RAW}"
-IMAGE="hku_mars_${PLATFORM_RAW}"
 RUNTIME_ARGS=(-it --rm)
 ENV_FLAGS=()
 EXTRA_VOLUMES=()
@@ -39,6 +39,7 @@ EXTRA_VOLUMES=()
 case "$PLATFORM_RAW" in
     amd64)
         # ===== Linux x86_64 (desktop/workstation with NVIDIA) =====
+        IMAGE="hku_mars_amd64"
         export DISPLAY="${DISPLAY:-:0}"
         xhost +local:root
 
@@ -56,8 +57,9 @@ case "$PLATFORM_RAW" in
         )
         ;;
 
-    jeston)
+    jetson)
         # ===== Linux aarch64 (Jetson/ARM64) =====
+        IMAGE="hku_mars_arm64"
         export DISPLAY="${DISPLAY:-:1}"
         xhost +local:root
 
@@ -76,12 +78,13 @@ case "$PLATFORM_RAW" in
 
     mac_os)
         # ===== macOS (Docker Desktop / Colima) =====
+        IMAGE="hku_mars_arm64"
         RUNTIME_ARGS+=(--name "$NAME")
         ;;
 
     *)
         echo "Unsupported platform: $PLATFORM_RAW"
-        echo "Use one of: amd64 | jeston | mac_os"
+        echo "Use one of: amd64 | jetson | mac_os"
         exit 1
         ;;
 esac

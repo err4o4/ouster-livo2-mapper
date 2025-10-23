@@ -22,7 +22,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     git build-essential pkg-config \
     v4l-utils iputils-ping net-tools usbutils \
-    nano wget cmake python3-pip python3-tk \
+    nano wget cmake python3-dev python3-pip python3-tk \
     libatlas-base-dev libgoogle-glog-dev libsuitesparse-dev libglew-dev \
     libjsoncpp-dev libeigen3-dev libspdlog-dev libcurl4-openssl-dev \
     libpcl-dev libturbojpeg0-dev libjpeg-dev libpng-dev libtiff-dev \
@@ -81,10 +81,11 @@ RUN git clone -b noetic https://github.com/ros-perception/image_pipeline.git
 
 # ---------- Clone FAST-* ----------
 RUN git clone https://github.com/err4o4/FAST-Calib.git
-RUN git clone https://github.com/hku-mars/LiDAR_IMU_Init.git
-
 RUN git clone https://github.com/err4o4/FAST-LIVO2.git
 RUN git clone https://github.com/hku-mars/FAST_LIO.git && cd FAST_LIO && git submodule update --init
+
+RUN ls -a ../../../../
+RUN git clone https://github.com/err4o4/LiDAR_IMU_Init.git
 
 # ---------- Build (catkin_make) ----------
 WORKDIR ${CATKIN_WS}
