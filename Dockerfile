@@ -83,7 +83,8 @@ RUN git clone -b noetic https://github.com/ros-perception/image_pipeline.git
 RUN git clone https://github.com/err4o4/FAST-Calib.git
 RUN git clone https://github.com/err4o4/FAST-LIVO2.git
 RUN git clone https://github.com/hku-mars/FAST_LIO.git && cd FAST_LIO && git submodule update --init
-RUN git clone https://github.com/hku-mars/LiDAR_IMU_Init.git
+RUN ls -a
+RUN git clone https://github.com/err4o4/LiDAR_IMU_Init.git
 
 # ---------- Build (catkin_make) ----------
 WORKDIR ${CATKIN_WS}
@@ -92,12 +93,10 @@ RUN touch ./src/FAST_LIO/CATKIN_IGNORE
 RUN /bin/bash -lc "source /opt/ros/noetic/setup.bash && \
     catkin_make -DCMAKE_BUILD_TYPE=Release"
 
-RUN ls ./build
-
 RUN rm ./src/LiDAR_IMU_Init/CATKIN_IGNORE
 RUN rm ./src/FAST_LIO/CATKIN_IGNORE
 RUN /bin/bash -lc "source /opt/ros/noetic/setup.bash && \
-    catkin_make -DCMAKE_BUILD_TYPE=Release --pkg lidar_imu_init fast_lio && \
+    catkin_make -DCMAKE_BUILD_TYPE=Release --pkg fast_lio lidar_imu_init && \
     echo 'source ${CATKIN_WS}/devel/setup.bash' >> /etc/bash.bashrc"
 
 # ---------- Default shell ----------
