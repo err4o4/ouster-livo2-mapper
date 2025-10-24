@@ -1,6 +1,10 @@
 kill all ros processes 
 pkill -f ros
 
+export DISABLE_ROS1_EOL_WARNINGS=1
+
+Use calib data
+https://github.com/hku-mars/FAST_LIO/issues/337
 
 Set lidar address
 ```

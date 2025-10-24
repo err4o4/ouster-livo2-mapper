@@ -90,22 +90,22 @@ case "$PLATFORM_RAW" in
 esac
 
 set -x
-#docker run \
-#  "${RUNTIME_ARGS[@]}" \
-#  "${PORT_MAPPING[@]}" \
-#  "${ENV_FLAGS[@]}" \
-#  "${EXTRA_VOLUMES[@]}" \
-#  "${COMMON_VOLUMES[@]}" \
-#  "$IMAGE"
+docker run \
+  "${RUNTIME_ARGS[@]}" \
+  "${PORT_MAPPING[@]}" \
+  "${ENV_FLAGS[@]}" \
+  "${EXTRA_VOLUMES[@]}" \
+  "${COMMON_VOLUMES[@]}" \
+  "$IMAGE"
 
 
-cmd=(docker run "${RUNTIME_ARGS[@]}" "${PORT_MAPPING[@]}")
+#cmd=(docker run "${RUNTIME_ARGS[@]}" "${PORT_MAPPING[@]}")
 
-((${#ENV_FLAGS[@]:-0}))      && cmd+=("${ENV_FLAGS[@]}")
-((${#EXTRA_VOLUMES[@]:-0}))  && cmd+=("${EXTRA_VOLUMES[@]}")
-((${#COMMON_VOLUMES[@]:-0})) && cmd+=("${COMMON_VOLUMES[@]}")
+#((${#ENV_FLAGS[@]:-0}))      && cmd+=("${ENV_FLAGS[@]}")
+#((${#EXTRA_VOLUMES[@]:-0}))  && cmd+=("${EXTRA_VOLUMES[@]}")
+#((${#COMMON_VOLUMES[@]:-0})) && cmd+=("${COMMON_VOLUMES[@]}")
 
-cmd+=("$IMAGE")
+#cmd+=("$IMAGE")
 
-set -x
-exec "${cmd[@]}"
+#set -x
+#exec "${cmd[@]}"
