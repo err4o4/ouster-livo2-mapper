@@ -1,13 +1,11 @@
 common:
     lid_topic:  "/ouster/points"
-    imu_topic:  "/imu/data"
-#    lid_topic: "/os_cloud_node/points"
-#    imu_topic: "/mavros/imu/data_raw"
+    imu_topic:  "/ouster/imu"
 
 preprocess:
     lidar_type: 3                # Ouster LiDAR
-    scan_line: 32
-    blind: 2
+    scan_line: 128
+    blind: 0.5
     feature_extract_en: false
 
 initialization:
