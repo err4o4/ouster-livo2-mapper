@@ -28,6 +28,8 @@ COMMON_VOLUMES=(
   -v ./ros_overlay/FAST-LIVO2/config:/opt/catkin_ws/src/FAST-LIVO2/config
   -v ./ros_overlay/FAST-LIVO2/launch:/opt/catkin_ws/src/FAST-LIVO2/launch
 
+  -v ./ros_overlay/data/launch:/root/data
+
   -v ./scripts:/opt/scripts
 )
 
@@ -100,12 +102,9 @@ docker run \
 
 
 #cmd=(docker run "${RUNTIME_ARGS[@]}" "${PORT_MAPPING[@]}")
-
 #((${#ENV_FLAGS[@]:-0}))      && cmd+=("${ENV_FLAGS[@]}")
 #((${#EXTRA_VOLUMES[@]:-0}))  && cmd+=("${EXTRA_VOLUMES[@]}")
 #((${#COMMON_VOLUMES[@]:-0})) && cmd+=("${COMMON_VOLUMES[@]}")
-
 #cmd+=("$IMAGE")
-
 #set -x
 #exec "${cmd[@]}"
