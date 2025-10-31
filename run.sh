@@ -93,7 +93,11 @@ case "$PLATFORM_RAW" in
         # ===== Linux x86_64 (desktop/workstation with NVIDIA) =====
         IMAGE="hku_mars_amd64"
         export DISPLAY="${DISPLAY:-:0}"
-        xhost +local:root
+
+        # Only run xhost if DISPLAY is set and xhost command exists
+        if [[ -n "${DISPLAY:-}" ]] && command -v xhost &> /dev/null; then
+            xhost +local:root || true
+        fi
 
         RUNTIME_ARGS+=(--network host --gpus all --name "$NAME")
         ENV_FLAGS+=(
@@ -113,7 +117,11 @@ case "$PLATFORM_RAW" in
         # ===== Linux aarch64 (Jetson/ARM64) =====
         IMAGE="hku_mars_arm64"
         export DISPLAY="${DISPLAY:-:1}"
-        xhost +local:root
+
+        # Only run xhost if DISPLAY is set and xhost command exists
+        if [[ -n "${DISPLAY:-}" ]] && command -v xhost &> /dev/null; then
+            xhost +local:root || true
+        fi
 
         RUNTIME_ARGS+=(--runtime nvidia --privileged --network host --name "$NAME")
         ENV_FLAGS+=(
