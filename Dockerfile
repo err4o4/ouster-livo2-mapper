@@ -78,26 +78,34 @@ RUN git clone https://github.com/Livox-SDK/livox_ros_driver.git
 RUN git clone --branch 0.3.7 https://github.com/ros-drivers/usb_cam.git
 RUN git clone https://github.com/err4o4/ros-econ-trigger-camera.git
 RUN git clone -b noetic https://github.com/ros-perception/image_pipeline.git
+RUN git clone https://github.com/err4o4/ros-supervisor
 
 # ---------- Clone FAST-* ----------
 RUN git clone https://github.com/err4o4/FAST-Calib.git
 RUN git clone https://github.com/err4o4/FAST-LIVO2.git
-RUN git clone https://github.com/hku-mars/FAST_LIO.git && cd FAST_LIO && git submodule update --init
-RUN ls -a
-RUN git clone https://github.com/err4o4/LiDAR_IMU_Init.git
 
 # ---------- Build (catkin_make) ----------
 WORKDIR ${CATKIN_WS}
-RUN touch ./src/LiDAR_IMU_Init/CATKIN_IGNORE
-RUN touch ./src/FAST_LIO/CATKIN_IGNORE
 RUN /bin/bash -lc "source /opt/ros/noetic/setup.bash && \
     catkin_make -DCMAKE_BUILD_TYPE=Release"
 
-RUN rm ./src/LiDAR_IMU_Init/CATKIN_IGNORE
-RUN rm ./src/FAST_LIO/CATKIN_IGNORE
-RUN /bin/bash -lc "source /opt/ros/noetic/setup.bash && \
-    catkin_make -DCMAKE_BUILD_TYPE=Release --pkg fast_lio lidar_imu_init && \
-    echo 'source ${CATKIN_WS}/devel/setup.bash' >> /etc/bash.bashrc"
+WORKDIR ${CATKIN_WS}/src
+RUN git clone https://github.com/err4o4/LiDAR_IMU_Init.git
+RUN git clone https://github.com/hku-mars/FAST_LIO.git && \
+    cd FAST_LIO && \
+    git submodule update --init
 
-# ---------- Default shell ----------
-CMD ["/bin/bash"]
+WORKDIR ${CATKIN_WS}
+RUN /bin/bash -lc "source /opt/ros/noetic/setup.bash && \
+    catkin_make -DCMAKE_BUILD_TYPE=Release --pkg fast_lio lidar_imu_init"
+
+# Setup ROS environment in bashrc (separate step, idempotent)
+RUN grep -qxF "source ${CATKIN_WS}/devel/setup.bash" /etc/bash.bashrc || \
+    echo "source ${CATKIN_WS}/devel/setup.bash" >> /etc/bash.bashrc
+
+# ---------- Copy and setup startup script ----------
+COPY /startup.sh /root/startup.sh
+RUN chmod +x /root/startup.sh
+
+# ---------- Default command ----------
+CMD ["/root/startup.sh"]

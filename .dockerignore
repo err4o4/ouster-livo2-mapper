@@ -1,0 +1,37 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# ROS overlay directories (mounted as volumes)
+ros_overlay/
+
+# Scripts (mounted as volumes, except startup.sh which is COPYed)
+scripts/*
+!scripts/.gitkeep
+
+# Build artifacts
+build/
+devel/
+*.log
+
+# Documentation
+*.md
+README*
+docs/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+*.tmp

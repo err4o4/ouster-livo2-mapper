@@ -1,16 +1,53 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-set -x
 
-if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <platform>"
-  echo "  platform: amd64 | jetson | mac_os"
+# Parse options
+INTERACTIVE=true
+RESTART_POLICY=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -d|--detached)
+      INTERACTIVE=false
+      shift
+      ;;
+    -r|--restart)
+      RESTART_POLICY="--restart unless-stopped"
+      shift
+      ;;
+    -*)
+      echo "Unknown option: $1"
+      echo "Usage: $0 [options] <platform>"
+      echo "Options:"
+      echo "  -d, --detached    Run in detached mode (no interactive bash)"
+      echo "  -r, --restart     Add restart policy (unless-stopped)"
+      echo "Platforms:"
+      echo "  amd64 | jetson | mac_os"
+      exit 1
+      ;;
+    *)
+      # This should be the platform
+      PLATFORM_RAW="$1"
+      shift
+      break
+      ;;
+  esac
+done
+
+# Check if platform was provided
+if [[ -z "${PLATFORM_RAW:-}" ]]; then
+  echo "Usage: $0 [options] <platform>"
+  echo "Options:"
+  echo "  -d, --detached    Run in detached mode (no interactive bash)"
+  echo "  -r, --restart     Add restart policy (unless-stopped)"
+  echo "Platforms:"
+  echo "  amd64 | jetson | mac_os"
   exit 1
 fi
 
-PLATFORM_RAW="$1"
+set -x
 
-PORT_MAPPING=(-p 8765:8765)
+PORT_MAPPING=(-p 8765:8765 -p 3001:3001)
 COMMON_VOLUMES=(
   -v ./ros_overlay/usb_cam/launch:/opt/catkin_ws/src/usb_cam/launch
 
@@ -28,13 +65,26 @@ COMMON_VOLUMES=(
   -v ./ros_overlay/FAST-LIVO2/config:/opt/catkin_ws/src/FAST-LIVO2/config
   -v ./ros_overlay/FAST-LIVO2/launch:/opt/catkin_ws/src/FAST-LIVO2/launch
 
-  -v ./ros_overlay/data/launch:/root/data
-
   -v ./scripts:/opt/scripts
+
+  -v ./ros_overlay/data:/root/data
+  -v ./ros_overlay/webapp:/root/webapp
 )
 
 NAME="hku_mars_${PLATFORM_RAW}"
-RUNTIME_ARGS=(-it --rm)
+
+# Set runtime args based on options
+if [[ "$INTERACTIVE" == true ]]; then
+  RUNTIME_ARGS=(-it --rm)
+else
+  RUNTIME_ARGS=(-d)
+fi
+
+# Add restart policy if specified
+if [[ -n "$RESTART_POLICY" ]]; then
+  RUNTIME_ARGS+=($RESTART_POLICY)
+fi
+
 ENV_FLAGS=()
 EXTRA_VOLUMES=()
 
@@ -92,19 +142,11 @@ case "$PLATFORM_RAW" in
 esac
 
 set -x
-docker run \
-  "${RUNTIME_ARGS[@]}" \
-  "${PORT_MAPPING[@]}" \
-  "${ENV_FLAGS[@]}" \
-  "${EXTRA_VOLUMES[@]}" \
-  "${COMMON_VOLUMES[@]}" \
-  "$IMAGE"
 
+# Build docker command with conditional array expansion
+cmd=(docker run "${RUNTIME_ARGS[@]}" "${PORT_MAPPING[@]}")
+((${#ENV_FLAGS[@]}))      && cmd+=("${ENV_FLAGS[@]}")
+((${#EXTRA_VOLUMES[@]}))  && cmd+=("${EXTRA_VOLUMES[@]}")
+cmd+=("${COMMON_VOLUMES[@]}" "$IMAGE")
 
-#cmd=(docker run "${RUNTIME_ARGS[@]}" "${PORT_MAPPING[@]}")
-#((${#ENV_FLAGS[@]:-0}))      && cmd+=("${ENV_FLAGS[@]}")
-#((${#EXTRA_VOLUMES[@]:-0}))  && cmd+=("${EXTRA_VOLUMES[@]}")
-#((${#COMMON_VOLUMES[@]:-0})) && cmd+=("${COMMON_VOLUMES[@]}")
-#cmd+=("$IMAGE")
-#set -x
-#exec "${cmd[@]}"
+exec "${cmd[@]}"
