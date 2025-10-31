@@ -91,7 +91,7 @@ RUN /bin/bash -lc "source /opt/ros/noetic/setup.bash && \
 
 WORKDIR ${CATKIN_WS}/src
 RUN git clone https://github.com/err4o4/LiDAR_IMU_Init.git
-RUN git clone https://github.com/hku-mars/FAST_LIO.git && \
+RUN git clone https://github.com/err4o4/FAST_LIO.git && \
     cd FAST_LIO && \
     git submodule update --init
 
