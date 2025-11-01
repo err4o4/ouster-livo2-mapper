@@ -6,12 +6,11 @@
     <rosparam command="load" file="$(find fast_lio)/config/ouster64.yaml" />
 
     <param name="feature_extract_enable" type="bool" value="0"/>
-    <param name="point_filter_num" type="int" value="3"/>  <!-- Keep more points for small room -->
-    <!--<param name="point_filter_num" type="int" value="20"/> for jetson-->
-    <param name="max_iteration" type="int" value="3" />  <!-- Increased for small room with close walls -->
-    <param name="filter_size_surf" type="double" value="0.05" />  <!-- Fine detail for 3x8m room -->
-    <param name="filter_size_map" type="double" value="0.15" />   <!-- Finer map for confined space -->
-    <param name="cube_side_length" type="double" value="2000" />
+    <param name="point_filter_num" type="int" value="10"/>  <!-- Keep more points for small room -->
+    <param name="max_iteration" type="int" value="2" />  <!-- Increased for small room with close walls -->
+    <param name="filter_size_surf" type="double" value="0.15" />  <!-- Fine detail for 3x8m room -->
+    <param name="filter_size_map" type="double" value="0.25" />   <!-- Finer map for confined space -->
+    <param name="cube_side_length" type="double" value="1000" />
     <param name="runtime_pos_log_enable" type="bool" value="0" />
     <node pkg="fast_lio" type="fastlio_mapping" name="laserMapping" output="screen" /> 
 
