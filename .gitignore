@@ -4,6 +4,9 @@ ros_overlay/FAST-Calib/calib_data/*
 ros_overlay/FAST-Calib/output/*
 !ros_overlay/FAST-Calib/output/.gitkeep
 
+ros_overlay/FAST_LIO/PCD/*
+!ros_overlay/FAST_LIO/PCD/.gitkeep
+
 ros_overlay/data/*
 !ros_overlay/data/.gitkeep
 
