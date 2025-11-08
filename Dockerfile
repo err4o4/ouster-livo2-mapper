@@ -27,7 +27,7 @@ RUN apt-get update \
     libjsoncpp-dev libeigen3-dev libspdlog-dev libcurl4-openssl-dev \
     libpcl-dev libturbojpeg0-dev libjpeg-dev libpng-dev libtiff-dev \
     libtheora-dev zlib1g-dev \
-    ros-noetic-rviz ros-noetic-rqt-bag \
+    ros-noetic-rviz ros-noetic-rqt-bag ros-noetic-serial \
     ros-noetic-foxglove-bridge ros-noetic-visualization-msgs \
     ros-noetic-geometry-msgs ros-noetic-nav-msgs \
     ros-noetic-std-msgs ros-noetic-stereo-msgs \
@@ -79,6 +79,10 @@ RUN git clone --branch 0.3.7 https://github.com/ros-drivers/usb_cam.git
 RUN git clone https://github.com/err4o4/ros-econ-trigger-camera.git
 RUN git clone -b noetic https://github.com/ros-perception/image_pipeline.git
 RUN git clone https://github.com/err4o4/ros-supervisor
+
+# ---------- Emlid GPS ----------
+RUN git clone https://github.com/tmxkn1/emlid_reach_ros.git
+RUN git clone https://github.com/tmxkn1/nmea_msgs.git
 
 # ---------- Clone FAST-* ----------
 RUN git clone https://github.com/err4o4/FAST-Calib.git
