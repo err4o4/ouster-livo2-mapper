@@ -67,10 +67,7 @@ COMMON_VOLUMES=(
   -v ./ros_overlay/FAST-LIVO2/launch:/opt/catkin_ws/src/FAST-LIVO2/launch
 
   -v ./scripts:/opt/scripts
-
   -v ./ros_overlay/data:/root/data
-  -v ./ros_overlay/data:/root/data
-  -v ./ros_overlay/webapp:/root/webapp
 )
 
 NAME="hku_mars_${PLATFORM_RAW}"
