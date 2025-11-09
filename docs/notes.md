@@ -93,3 +93,31 @@ roslaunch fast_calib multi_calib.launch
 
 camera mode trigger
 https://stackoverflow.com/questions/69055321/image-capturing-on-econ-see3cam-based-on-external-triggers
+
+
+
+
+
+ptp
+
+sudo nano /etc/systemd/system/ptp4l.service
+
+[Unit]
+Description=PTP4L Precision Time Protocol Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/ptp4l -i eth0 -m -4
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
+
+sudo systemctl daemon-reload
+sudo systemctl enable ptp4l.service
+sudo systemctl start ptp4l.service
+sudo systemctl status ptp4l.service

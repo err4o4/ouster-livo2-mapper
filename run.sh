@@ -50,6 +50,8 @@ set -x
 PORT_MAPPING=(-p 8765:8765 -p 3001:3001)
 COMMON_VOLUMES=(
   -v ./ros_overlay/usb_cam/launch:/opt/catkin_ws/src/usb_cam/launch
+  -v ./ros_overlay/ros-econ-trigger-camera/launch:/opt/catkin_ws/src/ros-econ-trigger-camera/launch
+  -v ./ros_overlay/emlid_reach_ros/launch:/opt/catkin_ws/src/emlid_reach_ros/launch
 
   -v ./ros_overlay/FAST-Calib/config:/opt/catkin_ws/src/FAST-Calib/config
   -v ./ros_overlay/FAST-Calib/output:/opt/catkin_ws/src/FAST-Calib/output
