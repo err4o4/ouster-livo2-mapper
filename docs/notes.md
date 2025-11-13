@@ -100,24 +100,50 @@ https://stackoverflow.com/questions/69055321/image-capturing-on-econ-see3cam-bas
 
 ptp
 
-sudo nano /etc/systemd/system/ptp4l.service
+sudo nano /etc/systemd/system/ptp-sync.service
 
 [Unit]
-Description=PTP4L Precision Time Protocol Daemon
+Description=PTP4L + PHC2SYS + Ouster PTP Profile Reset
 After=network-online.target
 Wants=network-online.target
 
 [Service]
-Type=simple
-ExecStart=/usr/sbin/ptp4l -i eth0 -m -4
+Type=exec
+ExecStart=/usr/bin/bash -c '\
+    echo "[PTP] Starting ptp4l..."; \
+    /usr/sbin/ptp4l -i eth0 -m -4 & \
+    sleep 3; \
+    echo "[PTP] Starting phc2sys..."; \
+    /usr/sbin/phc2sys -w -m -s CLOCK_REALTIME -c /dev/ptp0 -O 0 & \
+    sleep 6; \
+    echo "[PTP] Setting Ouster profile to gptp..."; \
+    /usr/bin/curl -i -X PUT http://192.168.100.2/api/v1/time/ptp/profile \
+        -H "Content-Type: application/json" \
+        --data-raw '"gptp"'; \
+    sleep 5; \
+    echo "[PTP] Setting Ouster profile back to default..."; \
+    /usr/bin/curl -i -X PUT http://192.168.100.2/api/v1/time/ptp/profile \
+        -H "Content-Type: application/json" \
+        --data-raw '"default"'; \
+    echo "[PTP] Done." \
+'
 Restart=always
-RestartSec=5
+RestartSec=3
 
 [Install]
 WantedBy=multi-user.target
 
 
+
 sudo systemctl daemon-reload
-sudo systemctl enable ptp4l.service
-sudo systemctl start ptp4l.service
-sudo systemctl status ptp4l.service
+sudo systemctl enable ptp-sync.service
+sudo systemctl start ptp-sync.service
+sudo systemctl status ptp-sync.service
+
+sudo phc_ctl /dev/ptp0 get
+curl http://192.168.100.2/api/v1/time
+
+curl -i -X PUT http://192.168.100.2/api/v1/time/ptp/profile -H "Content-Type: application/json" --data-raw '"gptp"'
+sleep 5
+curl -i -X PUT http://192.168.100.2/api/v1/time/ptp/profile -H "Content-Type: application/json" --data-raw '"default"'
+
