@@ -67,6 +67,7 @@ COMMON_VOLUMES=(
 
   -v ./ros_overlay/FAST-LIVO2/config:/opt/catkin_ws/src/FAST-LIVO2/config
   -v ./ros_overlay/FAST-LIVO2/launch:/opt/catkin_ws/src/FAST-LIVO2/launch
+  -v ./ros_overlay/FAST-LIVO2/Log:/opt/catkin_ws/src/FAST-LIVO2/Log
 
   -v ./scripts:/opt/scripts
   -v ./ros_overlay/data:/root/data
