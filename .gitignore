@@ -8,8 +8,14 @@ ros_overlay/FAST_LIO/PCD/*
 !ros_overlay/FAST_LIO/PCD/.gitkeep
 
 ros_overlay/FAST-LIVO2/Log/**
+
 !ros_overlay/FAST-LIVO2/Log/
 !ros_overlay/FAST-LIVO2/Log/**/
+
+!ros_overlay/FAST-LIVO2/Log/.gitkeep
+!ros_overlay/FAST-LIVO2/Log/image/.gitkeep
+!ros_overlay/FAST-LIVO2/Log/pcd/.gitkeep
+!ros_overlay/FAST-LIVO2/Log/result/.gitkeep
 
 ros_overlay/data/*
 !ros_overlay/data/.gitkeep
