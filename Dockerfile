@@ -26,7 +26,7 @@ RUN apt-get update \
     libatlas-base-dev libgoogle-glog-dev libsuitesparse-dev libglew-dev \
     libjsoncpp-dev libeigen3-dev libspdlog-dev libcurl4-openssl-dev \
     libpcl-dev libturbojpeg0-dev libjpeg-dev libpng-dev libtiff-dev \
-    libtheora-dev zlib1g-dev \
+    libtheora-dev zlib1g-dev libzip-dev \
     ros-noetic-rviz ros-noetic-rqt-bag ros-noetic-serial \
     ros-noetic-foxglove-bridge ros-noetic-visualization-msgs \
     ros-noetic-geometry-msgs ros-noetic-nav-msgs \
