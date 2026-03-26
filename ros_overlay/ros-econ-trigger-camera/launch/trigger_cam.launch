@@ -6,7 +6,7 @@
   <arg name="format" default="MJPG" />
   <arg name="trigger_mode" default="true" />
   <arg name="auto_lock" default="true" />
-  <arg name="exposure" default="33333" />
+  <arg name="exposure" default="2000" />
   <arg name="publish_raw" default="true" />
   <arg name="publish_compressed" default="true" />
   <arg name="jpeg_quality" default="20" />
