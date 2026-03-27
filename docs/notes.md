@@ -95,7 +95,11 @@ camera mode trigger
 https://stackoverflow.com/questions/69055321/image-capturing-on-econ-see3cam-based-on-external-triggers
 
 
+Lidar standby
+curl -i -X PUT http://192.168.100.2/api/v1/sensor/config/operating_mode -H "Content-Type: application/json" --data-raw '"STANDBY"'
 
+
+PTP
 
 ```
 sudo systemctl daemon-reload
