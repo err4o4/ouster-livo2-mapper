@@ -21,9 +21,9 @@ extrin_calib:
 
 time_offset:
   lidar_time_offset: 0.0
-  imu_time_offset: 0.0
-  img_time_offset: -0.2
-  exposure_time_init: 0.0
+  imu_time_offset: -0.002
+  img_time_offset: -0.049
+  exposure_time_init: 0 #0.010
 
 preprocess:
   point_filter_num: 5
