@@ -129,25 +129,64 @@ sudo chmod +x /usr/local/bin/ptp-sync.sh
 #!/usr/bin/env bash
 set -e
 
+INTERFACE="eth0"
+PHC_DEVICE="/dev/ptp0"
+OUSTER_IP="192.168.100.2"
+
+echo "[PTP] Enabling NTP..."
+timedatectl set-ntp true || true
+
+echo "[PTP] Waiting for NTP/system clock sync..."
+
+while true; do
+    YEAR="$(date +%Y)"
+    NTP_SYNCED="$(timedatectl show -p NTPSynchronized --value 2>/dev/null || echo no)"
+
+    if [ "$YEAR" -ge 2024 ] && [ "$NTP_SYNCED" = "yes" ]; then
+        echo "[PTP] System time is valid and NTP synchronized."
+        date
+        break
+    fi
+
+    echo "[PTP] Waiting... year=${YEAR}, ntp_synced=${NTP_SYNCED}"
+    sleep 1
+done
+
+echo "[PTP] Writing system time to RTC devices..."
+
+if [ -e /dev/rtc0 ]; then
+    echo "[PTP] Writing to /dev/rtc0..."
+    /usr/sbin/hwclock -w -f /dev/rtc0 || echo "[PTP] WARNING: failed to write /dev/rtc0"
+fi
+
+if [ -e /dev/rtc1 ]; then
+    echo "[PTP] Writing to /dev/rtc1..."
+    /usr/sbin/hwclock -w -f /dev/rtc1 || echo "[PTP] WARNING: failed to write /dev/rtc1"
+fi
+
+echo "[PTP] RTC status after write:"
+/usr/sbin/hwclock -r -f /dev/rtc0 2>/dev/null || true
+/usr/sbin/hwclock -r -f /dev/rtc1 2>/dev/null || true
+
 echo "[PTP] Starting ptp4l..."
-/usr/sbin/ptp4l -i eth0 -m -4 &
+/usr/sbin/ptp4l -i "$INTERFACE" -m -4 &
 
 sleep 3
 
-echo "[PTP] Starting phc2sys..."
-/usr/sbin/phc2sys -w -m -s CLOCK_REALTIME -c /dev/ptp0 -O 0 &
+echo "[PTP] Starting phc2sys: CLOCK_REALTIME -> ${PHC_DEVICE}..."
+/usr/sbin/phc2sys -w -m -s CLOCK_REALTIME -c "$PHC_DEVICE" -O 0 &
 
 sleep 6
 
 echo "[PTP] Setting Ouster profile to gptp..."
-/usr/bin/curl -i -X PUT http://192.168.100.2/api/v1/time/ptp/profile \
+/usr/bin/curl -i -X PUT "http://${OUSTER_IP}/api/v1/time/ptp/profile" \
   -H 'Content-Type: application/json' \
   --data-raw '"gptp"'
 
 sleep 5
 
 echo "[PTP] Setting Ouster profile back to default..."
-/usr/bin/curl -i -X PUT http://192.168.100.2/api/v1/time/ptp/profile \
+/usr/bin/curl -i -X PUT "http://${OUSTER_IP}/api/v1/time/ptp/profile" \
   -H 'Content-Type: application/json' \
   --data-raw '"default"'
 
