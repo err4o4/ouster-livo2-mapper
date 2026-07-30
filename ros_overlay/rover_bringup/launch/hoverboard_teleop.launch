@@ -1,0 +1,57 @@
+<launch>
+  <!-- Hardware devices -->
+  <arg name="serial_port" default="/dev/ttyUSB0"/>
+  <arg name="joy_dev" default="/dev/input/js0"/>
+
+  <!-- Joystick mapping: change after checking rostopic echo /joy -->
+  <arg name="axis_linear" default="1"/>
+  <arg name="axis_angular" default="0"/>
+  <arg name="enable_button" default="4"/>
+  <arg name="enable_turbo_button" default="5"/>
+
+  <!-- Speed limits -->
+  <arg name="scale_linear" default="-0.35"/>
+  <arg name="scale_angular" default="1.0"/>
+  <arg name="scale_linear_turbo" default="-0.60"/>
+  <arg name="scale_angular_turbo" default="1.8"/>
+
+  <!-- hoverboard-driver reads this global parameter -->
+  <param name="port" type="str" value="$(arg serial_port)"/>
+
+  <!-- Start hoverboard hardware and controllers -->
+  <include file="$(find hoverboard_driver)/launch/hoverboard.launch"/>
+
+  <!-- Raw joystick driver -->
+  <node pkg="joy"
+        type="joy_node"
+        name="joy_node"
+        output="screen">
+    <param name="dev" value="$(arg joy_dev)"/>
+    <param name="deadzone" value="0.08"/>
+    <param name="autorepeat_rate" value="20.0"/>
+    <param name="coalesce_interval" value="0.01"/>
+  </node>
+
+  <!-- Convert sensor_msgs/Joy into geometry_msgs/Twist -->
+  <node pkg="teleop_twist_joy"
+        type="teleop_node"
+        name="teleop_twist_joy"
+        output="screen">
+
+    <param name="axis_linear" value="$(arg axis_linear)"/>
+    <param name="axis_angular" value="$(arg axis_angular)"/>
+
+    <param name="enable_button" value="$(arg enable_button)"/>
+    <param name="enable_turbo_button" value="$(arg enable_turbo_button)"/>
+    <param name="require_enable_button" value="true"/>
+
+    <param name="scale_linear" value="$(arg scale_linear)"/>
+    <param name="scale_angular" value="$(arg scale_angular)"/>
+    <param name="scale_linear_turbo" value="$(arg scale_linear_turbo)"/>
+    <param name="scale_angular_turbo" value="$(arg scale_angular_turbo)"/>
+
+    <!-- Controller expects cmd_vel under its namespace -->
+    <remap from="cmd_vel"
+           to="/hoverboard_velocity_controller/cmd_vel"/>
+  </node>
+</launch>

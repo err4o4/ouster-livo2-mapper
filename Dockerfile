@@ -18,6 +18,12 @@ RUN apt-get install -y --no-install-recommends curl gnupg2 lsb-release \
  && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies
+
+# deps only for robot rover!
+# ros-noetic-hardware-interface ros-noetic-controller-manager \
+#    ros-noetic-control-toolbox ros-noetic-rosparam-shortcuts \
+#    ros-noetic-joy ros-noetic-teleop-twist-joy ros-noetic-ros-controllers
+
 RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     git build-essential pkg-config \
@@ -33,7 +39,10 @@ RUN apt-get update \
     ros-noetic-std-msgs ros-noetic-stereo-msgs \
     ros-noetic-tf ros-noetic-tf-conversions \
     ros-noetic-pcl-ros ros-noetic-pcl-conversions \
-    ros-noetic-eigen-conversions ros-noetic-camera-info-manager 
+    ros-noetic-eigen-conversions ros-noetic-camera-info-manager \
+    ros-noetic-hardware-interface ros-noetic-controller-manager \
+    ros-noetic-control-toolbox ros-noetic-rosparam-shortcuts \
+    ros-noetic-joy ros-noetic-teleop-twist-joy ros-noetic-ros-controllers
 
 # Install pyusb to toggle camera to trigger mode
 RUN pip3 install pyusb
@@ -87,6 +96,9 @@ RUN git clone https://github.com/tmxkn1/nmea_msgs.git
 # ---------- Clone FAST-* ----------
 RUN git clone https://github.com/err4o4/FAST-Calib.git
 RUN git clone https://github.com/err4o4/FAST-LIVO2.git
+
+# ---------- Clone hoverboard driver ----------
+RUN git clone https://github.com/hoverboard-robotics/hoverboard-driver.git
 
 # ---------- Build (catkin_make) ----------
 WORKDIR ${CATKIN_WS}
